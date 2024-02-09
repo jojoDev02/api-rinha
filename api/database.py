@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine("mysql://root:123456@127.0.0.1:3306/banco")
+engine = create_engine("mysql://root:123456@db:3306/banco")
 
 Base = declarative_base()
 

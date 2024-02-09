@@ -1,5 +1,3 @@
-
-import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, func, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
@@ -27,7 +25,6 @@ class Cliente(Base):
         self.saldo -= valor
         return
         
-    
     def creditar(self, valor):
         self.saldo += valor
 

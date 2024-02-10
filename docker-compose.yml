@@ -48,9 +48,9 @@ services:
       - default
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     volumes:
-      - ./nginx.conf:/docker-entrypoint.d/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - 9999:9999
     depends_on:

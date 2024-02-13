@@ -1,8 +1,10 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine("mysql://root:123456@db:3306/banco")
+DATABASE_URI = os.environ.get('DATABASE_URI')
+engine = create_engine("{}".format(DATABASE_URI))
 
 Base = declarative_base()
 

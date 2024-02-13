@@ -35,6 +35,13 @@ class Cliente(Base):
             'transacoes': [transacao.to_dict() for transacao in self.transacoes]
         }
 
+class Saldo(Base):
+    __tablename__ = 'saldos'
+    
+    id = Column(Integer, primary_key=True)
+    cliente_id = Column(Integer, ForeignKey('cliente.id'), nullable=False)
+    valor = Column(Integer, nullable=False)
+
 class Transacao(Base):
     __tablename__ = 'transacoes'
 

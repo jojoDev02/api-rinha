@@ -35,7 +35,7 @@ def create_transacao(cliente_id):
         except Exception as e:
             return {"error": "{}".format(e)}, 422
     else:
-        saldo_atualizado = saldo.creditar(valor, limite)
+        saldo_atualizado = saldo.creditar(valor)
         
     
     nova_transacao = Transacao(valor, tipo, descricao, cliente_id)

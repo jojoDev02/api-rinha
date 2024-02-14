@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+
 DATABASE_URI = os.environ.get('DATABASE_URI')
 engine = create_engine("{}".format(DATABASE_URI))
 
@@ -19,3 +20,4 @@ def save_objeto(objeto, s):
     except Exception as e:
         s.rollback()
         raise e
+    

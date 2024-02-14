@@ -15,21 +15,27 @@ class Cliente(Base):
     def get_limite(self):
         return self.limite
     
-    def debitar(self, valor):
-        if (self.saldo - valor < -self.limite):
-            raise ValueError("Débito excede o limite disponível.")
-        self.saldo -= valor
-        return
-        
-    def creditar(self, valor):
-        self.saldo += valor
-
+    
 class Saldo(Base):
     __tablename__ = 'saldos'
 
     id = Column(Integer, primary_key=True)
-    cliente_id = Column(Integer, ForeignKey('cliente.id'), nullable=False)
+    cliente_id = Column(Integer, ForeignKey('clientes.id'), nullable=False)
     valor = Column(Integer, nullable=False)
+
+    def get_valor(self):
+        return self.valor
+
+    def debitar(self, valor_debito, limite):
+        if (self.valor - valor_debito < -limite):
+            raise ValueError("Débito excede o limite disponível.")
+        self.valor -= valor_debito
+        return self.valor
+        
+    def creditar(self, valor):
+        self.valor += valor
+        return self.valor
+
 
 class Transacao(Base):
     __tablename__ = 'transacoes'

@@ -1,15 +1,23 @@
 import datetime
 from flask import Flask, request
 from database import save_objeto, get_session
-from models import Transacao, Cliente
+from models import Transacao, Cliente, Saldo
 
 app = Flask(__name__)
 
 session = get_session()
 
+def get_saldo_by_cliente_id(cliente_id_buscado):
+    saldo = session.query(Saldo).filter_by(cliente_id = cliente_id_buscado).first()
+    return saldo
+
+def get_cliente_by_id(cliente_id):
+   cliente = session.query(Cliente).filter_by(id=cliente_id).first()
+   return cliente
+
 @app.route("/clientes/<cliente_id>/transacoes", methods=["POST"])
 def create_transacao(cliente_id):
-    cliente = session.query(Cliente).filter_by(id=cliente_id).first()
+    cliente = get_cliente_by_id(cliente_id)
     if not cliente:
         return {"error":"cliente não encontrado."},404
     
@@ -17,32 +25,37 @@ def create_transacao(cliente_id):
     valor = dados["valor"]
     tipo = dados["tipo"]
     descricao = dados["descricao"]
+    
+    saldo = get_saldo_by_cliente_id(cliente.id)
 
     if tipo == 'd':
+        limite = cliente.get_limite()
         try:
-            cliente.debitar(valor)
+            saldo_atualizado = saldo.debitar(valor, limite)
         except Exception as e:
             return {"error": "{}".format(e)}, 422
     else:
-        cliente.creditar(valor)
+        saldo_atualizado = saldo.creditar(valor, limite)
+        
     
     nova_transacao = Transacao(valor, tipo, descricao, cliente_id)
     save_objeto(nova_transacao, session)
 
     return {"limite": cliente.get_limite(),
-            "saldo" : cliente.get_saldo()},200
+            "saldo" : saldo_atualizado},200
 
 
 @app.route("/clientes/<cliente_id>/extrato", methods= ["GET"])
 def get_transacoes(cliente_id):
-    cliente = session.query(Cliente).filter_by(id=cliente_id).first()
+    cliente = get_cliente_by_id(cliente_id)
     if not cliente:
         return {"error":"cliente não encontrado."},404
     
+    saldo = get_saldo_by_cliente_id(cliente.id)
     transacoes = session.query(Transacao).filter_by(cliente_id=cliente_id).order_by(Transacao.realizada_em.desc()).limit(10).all()
     
     extrato = {"saldo": {
-        "total": cliente.get_saldo(),
+        "total": saldo.get_valor(),
         "data_extrato": str(datetime.datetime.utcnow()),
         "limite" : cliente.get_limite()
     },

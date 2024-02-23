@@ -18,6 +18,7 @@ def get_cliente_by_id(cliente_id):
 @app.route("/clientes/<cliente_id>/transacoes", methods=["POST"])
 def create_transacao(cliente_id):
     cliente = get_cliente_by_id(cliente_id)
+
     if not cliente:
         return {"error":"cliente não encontrado."},404
     
@@ -26,7 +27,10 @@ def create_transacao(cliente_id):
     tipo = dados["tipo"]
     descricao = dados["descricao"]
     
-    saldo = get_saldo_by_cliente_id(cliente.id)
+    if tipo != 'c' and tipo != 'd' or descricao is None or len(descricao) < 1 or len(descricao) > 10:
+        return {"error": "Dados inválidos."}, 422
+    
+    saldo = get_saldo_by_cliente_id(cliente_id) 
 
     if tipo == 'd':
         limite = cliente.get_limite()
@@ -34,12 +38,13 @@ def create_transacao(cliente_id):
             saldo_atualizado = saldo.debitar(valor, limite)
         except Exception as e:
             return {"error": "{}".format(e)}, 422
-    else:
+    elif tipo == 'c':
         saldo_atualizado = saldo.creditar(valor)
         
     
     nova_transacao = Transacao(valor, tipo, descricao, cliente_id)
-    save_objeto(nova_transacao, session)
+    session.add(nova_transacao)
+    # save_objeto(nova_transacao, session)
 
     return {"limite": cliente.get_limite(),
             "saldo" : saldo_atualizado},200
@@ -51,7 +56,7 @@ def get_transacoes(cliente_id):
     if not cliente:
         return {"error":"cliente não encontrado."},404
     
-    saldo = get_saldo_by_cliente_id(cliente.id)
+    saldo = get_saldo_by_cliente_id(cliente_id)
     transacoes = session.query(Transacao).filter_by(cliente_id=cliente_id).order_by(Transacao.realizada_em.desc()).limit(10).all()
     
     extrato = {"saldo": {
